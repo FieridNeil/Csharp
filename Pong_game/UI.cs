@@ -4,7 +4,7 @@ using System.Windows.Forms;
  class UI : Form
 {
     // Menu controls
-    Panel Menu = new Panel();
+    Panel Menu_panel = new Panel();
     Button Play = new Button();
     Button Quit = new Button();
     Label title = new Label();
@@ -14,6 +14,7 @@ using System.Windows.Forms;
     public Button start = new Button();
     public Button reset = new Button();
     Button return_to_menu = new Button();
+    Button replace_pluck = new Button();
 
     // Game area setting
     public Panel game_area = new Panel();
@@ -25,6 +26,8 @@ using System.Windows.Forms;
         public Point location;
         public SolidBrush brush;
         public int speed;
+        public bool moveup_keypress;
+        public bool movedown_keypress;
     }
 
     public Paddle paddle1 = new Paddle();
@@ -35,7 +38,9 @@ using System.Windows.Forms;
         public int diameter;
         public Point location;
         public SolidBrush brush;
-        public int speed;
+        public double speedX;
+        public double speedY;
+        public double angle;
     }
 
     public Pluck pluck;
@@ -45,10 +50,16 @@ using System.Windows.Forms;
         this.Width = 800;
         this.Height = 500;
         this.BackColor = Color.Beige;
-        Menu.Dock = DockStyle.Fill;
-        this.Controls.Add(Menu);
+        Menu_panel.Dock = DockStyle.Fill;
+        this.Controls.Add(Menu_panel);
         MenuUI();
-        
+
+    }
+
+    private double randDouble(double min, double max)
+    {
+        Random random = new Random();
+        return random.NextDouble() * (max - min) + max;
     }
 
 
@@ -67,7 +78,7 @@ using System.Windows.Forms;
         title.Text = "Welcome to Pong game";
         title.Location = new Point(200, 5);
         title.Font = new Font(this.Font.Name, 30);
-        Menu.Controls.Add(title);
+        Menu_panel.Controls.Add(title);
 
         Play.AutoSize = true;
         Play.Text = "Play";
@@ -75,7 +86,7 @@ using System.Windows.Forms;
         Play.Anchor = AnchorStyles.None;
         Play.Location = new Point(200, this.ClientSize.Height / 2 - Play.Height / 2);
         Play.Click += Play_Click;
-        Menu.Controls.Add(Play);
+        Menu_panel.Controls.Add(Play);
 
         Quit.AutoSize = true;
         Quit.Text = "Quit";
@@ -83,12 +94,12 @@ using System.Windows.Forms;
         Quit.Anchor = AnchorStyles.None;
         Quit.Location = new Point(500, this.ClientSize.Height / 2 - Quit.Height / 2);
         Quit.Click += Quit_Click;
-        Menu.Controls.Add(Quit);
+        Menu_panel.Controls.Add(Quit);
     }
 
     private void Play_Click(object sender, EventArgs e)
     {
-        Menu.Visible = false;
+        Menu_panel.Visible = false;
         control.Visible = true;
         GamePlayUI();
     }
@@ -105,18 +116,16 @@ using System.Windows.Forms;
         game_area.BackColor = Color.AliceBlue;
         this.Controls.Add(game_area);
 
-
         control.Dock = DockStyle.Bottom;
         control.Height = 50;
         control.BackColor = Color.CadetBlue;
         this.Controls.Add(control);
-
         game_area.Paint += draw;
 
         start.AutoSize = true;
         start.Height = 25;
         start.Text = "Start";
-        start.Location = new Point(200, 10);
+        start.Location = new Point(100, 10);
         control.Controls.Add(start);
 
 
@@ -130,6 +139,12 @@ using System.Windows.Forms;
         return_to_menu.Location = new Point(reset.Location.X + reset.Width + button_margin, 10);
         return_to_menu.Click += return_to_menu_Click;
         control.Controls.Add(return_to_menu);
+
+        replace_pluck.AutoSize = true;
+        replace_pluck.Text = "Replace Pluck";
+        replace_pluck.Location = new Point(return_to_menu.Location.X + return_to_menu.Width + button_margin, 10);
+        replace_pluck.Click += replace_pluck_Click;
+        control.Controls.Add(replace_pluck);
 
         paddle1.width = 20;
         paddle1.height = 80;
@@ -146,16 +161,26 @@ using System.Windows.Forms;
         pluck.diameter = 25;
         pluck.location = new Point(game_area.Width / 2 - pluck.diameter / 2, game_area.Height / 2 - pluck.diameter / 2);
         pluck.brush = new SolidBrush(Color.Red);
-        pluck.speed = 1;
+        pluck.angle = randDouble(0, 360);
+        pluck.speedX = 3*Math.Cos(pluck.angle * Math.PI / 180);
+        pluck.speedY = 3*Math.Sin(pluck.angle * Math.PI / 180);
 
     }
 
     private void return_to_menu_Click(object sender, EventArgs e)
     {
-        Menu.Visible = true;
+        Menu_panel.Visible = true;
         control.Visible = false;
     }
 
+    private void replace_pluck_Click(object sender, EventArgs e)
+    {
+        pluck.location = new Point(game_area.Width / 2 - pluck.diameter / 2, game_area.Height / 2 - pluck.diameter / 2);
+        pluck.angle = randDouble(0, 360);
+        pluck.speedX = 3 * Math.Cos(pluck.angle * Math.PI / 180);
+        pluck.speedY = 3 * Math.Sin(pluck.angle * Math.PI / 180);
+        game_area.Invalidate();
+    }
     public void draw(object sender, PaintEventArgs e)
     {
         e.Graphics.FillEllipse(pluck.brush, pluck.location.X, pluck.location.Y, pluck.diameter, pluck.diameter);
