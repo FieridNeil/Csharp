@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
  class UI : Form
 {
+    
     // Menu controls
     Panel Menu_panel = new Panel();
     Button Play = new Button();
@@ -53,7 +54,6 @@ using System.Windows.Forms;
         Menu_panel.Dock = DockStyle.Fill;
         this.Controls.Add(Menu_panel);
         MenuUI();
-
     }
 
     private double randDouble(double min, double max)
@@ -62,16 +62,7 @@ using System.Windows.Forms;
         return random.NextDouble() * (max - min) + max;
     }
 
-
-    protected override void OnLoad(EventArgs e)
-    {
-        base.OnLoad(e);
-
-        this.DoubleBuffered = true;
-    }
-
-
-
+    // Initializaion of MenuUI
     private void MenuUI()
     {
         title.AutoSize = true;
@@ -109,9 +100,11 @@ using System.Windows.Forms;
         Application.Exit();
     }
 
+    // Initialization of GamePlayUI
     public void GamePlayUI()
     {
-        Int16 button_margin = 100;
+        int button_margin = 100;
+
         game_area.Dock = DockStyle.Fill;
         game_area.BackColor = Color.AliceBlue;
         this.Controls.Add(game_area);
@@ -127,7 +120,6 @@ using System.Windows.Forms;
         start.Text = "Start";
         start.Location = new Point(100, 10);
         control.Controls.Add(start);
-
 
         reset.AutoSize = true;
         reset.Text = "Reset";
@@ -180,6 +172,7 @@ using System.Windows.Forms;
         pluck.speedX = 3 * Math.Cos(pluck.angle * Math.PI / 180);
         pluck.speedY = 3 * Math.Sin(pluck.angle * Math.PI / 180);
         game_area.Invalidate();
+        game_area.Focus();
     }
     public void draw(object sender, PaintEventArgs e)
     {
