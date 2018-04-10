@@ -1,0 +1,21 @@
+<Window x:Class="MusicPlayer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:MusicPlayer"
+        Title="MainWindow" Height="540" Width="810">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.5*" />
+            <RowDefinition Height="3*" />
+            <RowDefinition Height="0.5*" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Center">
+            <Button Name="btnOpenAudioFile" Click="btnOpenAudioFile_Click" Width="100" Height="50">Open Audio file</Button>
+            <Button Name="btnPrev" Click="btnPrev_Click" Width="100" Height="50">Prev</Button>
+            <Button Name="btnPlay" Click="btnPlay_Click" Width="100" Height="50">Play</Button>
+            <Button Name="btnNext" Click="btnNext_Click" Width="100" Height="50">Next</Button>
+            <Button Name="btnLoop" Click="btnLoop_Click" Width="100" Height="50">Loop</Button>
+        </StackPanel>
+        <Label Name="nowPlayinglabel" Grid.Row="1"></Label>
+    </Grid>
+</Window>
