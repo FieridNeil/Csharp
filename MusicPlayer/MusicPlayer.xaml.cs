@@ -3,8 +3,7 @@ using System;
 using System.Windows;
 using System.Windows.Media;
 using System.Collections.Generic;
-
-
+using System.Windows.Threading;
 namespace MusicPlayer
 {
     /// <summary>
@@ -16,16 +15,43 @@ namespace MusicPlayer
         private VideoDrawing vd = new VideoDrawing();
         //private Queue<Uri> queue = new Queue<Uri>();
         private List<Uri> queue = new List<Uri>();
-        bool isPlaying = false;
-        bool isLooping = false;
+        static bool isPlaying = false;
+        static bool isLooping = false;
         private static int songIndex = 0;
         private static bool execute = true;
-   
+        DispatcherTimer timeline = new DispatcherTimer();
+        private static TimeSpan duration;
+        private static TimeSpan length;
+        
         public MainWindow()
         {
             InitializeComponent();
 
-            nowPlayinglabel.Content = "No file is playing";
+            timeline.Tick += Timeline_Tick;
+            timeline.Interval = new TimeSpan(0, 0, 1);
+            mediaPlayer.MediaEnded += MediaPlayer_MediaEnded;
+        }
+
+        private void MediaPlayer_MediaEnded(object sender, EventArgs e)
+        {
+            if(isLooping == true)
+            {
+                mediaPlayer.Position = new TimeSpan(0);
+            }else
+            {
+                btnPlay.Content = "Play";
+                nextSong();
+            }
+        }
+
+        private void Timeline_Tick(object sender, EventArgs e)
+        {
+            duration = mediaPlayer.Position;
+            //HasTimeSpan will turn to true about a second after the mp3 is played
+            if (mediaPlayer.NaturalDuration.HasTimeSpan == true)
+            {
+                length = mediaPlayer.NaturalDuration.TimeSpan;
+            }
 
         }
 
@@ -45,6 +71,7 @@ namespace MusicPlayer
                 }
                 
             }
+           
         }
 
         private void btnPlay_Click(object sender, RoutedEventArgs e)
@@ -54,25 +81,52 @@ namespace MusicPlayer
 
         private void btnNext_Click(object sender, RoutedEventArgs e)
         {
-            songIndex++;
-            execute = true;
-            isPlaying = false;
-            playSong();
+            nextSong();
         }
 
         private void btnPrev_Click(object sender, RoutedEventArgs e)
         {
-            songIndex--;
-            execute = true;
-            isPlaying = false;
-            playSong();
+            if(duration > new TimeSpan(0, 0, 5))
+            {
+                mediaPlayer.Position = new TimeSpan(0);
+            }else
+            {
+                prevSong();
+
+            }
         }
+
+
 
         private void btnLoop_Click(object sender, RoutedEventArgs e)
         {
-
+            isLooping = !isLooping;
+            Console.WriteLine("Loop: " + isLooping);
         }
 
+        private void nextSong()
+        {
+            // Check index upperbound
+            if ((songIndex + 1) < queue.Count)
+            {
+                songIndex++;
+                execute = true;
+                isPlaying = false;
+                playSong();
+            }
+        }
+
+        private void prevSong()
+        {
+            // Check index lowerbound
+            if ((songIndex - 1) > -1)
+            {
+                songIndex--;
+                execute = true;
+                isPlaying = false;
+                playSong();
+            }
+        }
         private void playSong()
         {
             if (execute)
@@ -80,8 +134,8 @@ namespace MusicPlayer
                 if (queue.Count > 0)
                 {
                     Uri song = queue[songIndex];
-                    nowPlayinglabel.Content = song.ToString();
                     mediaPlayer.Open(song);
+                    timeline.Start();
                     execute = false;
                 }else
                 {
@@ -95,12 +149,14 @@ namespace MusicPlayer
                 mediaPlayer.Play();
                 btnPlay.Content = "Pause";
                 isPlaying = true;
+                timeline.Start();
             }
             else
             {
                 mediaPlayer.Pause();
                 btnPlay.Content = "Play";
                 isPlaying = false;
+                timeline.Stop();
             }
         }
     }
